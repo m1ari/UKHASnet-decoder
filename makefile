@@ -1,3 +1,7 @@
+# Define the default Gateway name
+# This should only contain Uppercase characters and numbers
+GATEWAY = UKHASGW
+
 SHELL = /bin/sh
 CC    = gcc
  
@@ -7,7 +11,7 @@ SOURCES = UKHASnet-decoder.c
 all: $(TARGET)
 	
 $(TARGET): $(SOURCES)
-	$(CC) -std=gnu99 -o $(TARGET) $(SOURCES) -lcurl
+	$(CC) -std=gnu99 -o $(TARGET) $(SOURCES) -lcurl -DGATEWAY_ID=\"$(GATEWAY)\"
 
 $(TARGET).exe: $(SOURCES)
 	i686-w64-mingw32-gcc -std=gnu99 -o $@ $^ \

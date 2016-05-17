@@ -14,7 +14,9 @@
 #endif
 
 // The identifier of this gateway
-#define GATEWAY_ID "J0"
+#ifndef GATEWAY_ID
+    #error "The GATEWAY_ID value needs to be defined via your compiler"
+#endif
 
 // Size of the character buffer to use for curl requests
 #define CURLBUF_SIZE 250
