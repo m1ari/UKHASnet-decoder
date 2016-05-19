@@ -9,6 +9,10 @@
 #include <unistd.h> // getopt
 #include <curl/curl.h>
 
+#ifdef _WIN32	// We could also use __MINGW32__
+    #include <fcntl.h>
+#endif
+
 // The identifier of this gateway
 #define GATEWAY_ID "J0"
 
@@ -157,7 +161,8 @@ bool processByte(uint8_t byte) {
                        curlbuf);
                 res = curl_easy_perform(curl);
                 if(res != CURLE_OK)
-                    printf("CURL request failed, aborting...\n");
+                    fprintf(stderr, "CURL request failed (%s)\n", curl_easy_strerror(res));
+                    //printf("CURL request failed, aborting...\n");
             }
         } else if (verbose) {
             printTime();
@@ -259,6 +264,11 @@ int main (int argc, char**argv){
         devnull = fopen("/dev/null", "w+");
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, devnull);
     }
+
+#ifdef _WIN32	// We could also use __MINGW32__
+    // Set stdin to Binary Mode
+    setmode(fileno(stdin), O_BINARY);
+#endif
 
     // Read incoming data from dongle
     while(!feof(stdin) ) {

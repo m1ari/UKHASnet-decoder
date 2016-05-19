@@ -17,6 +17,12 @@ Get started
 
 `./UKHASnet-decoder -h`
 
+Compiling for Windows
+-------
+It's possible to Cross Compile a windows .exe version from a Raspberry Pi (or other Linux System).
+You will need the mingw-w64 toolchain (these are different to the Mingw32 toolchain) and libraries for zlib, openssl and curl.
+Details for setting up the environment are avaialble at: https://ukhas.net/wiki/guides:rtlsdr_decoder_windows
+
 TODO (see code for details)
 -------
 - Synchronisation:
