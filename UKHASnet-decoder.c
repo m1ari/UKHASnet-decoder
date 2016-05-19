@@ -261,7 +261,11 @@ int main (int argc, char**argv){
         curl_global_init(CURL_GLOBAL_ALL);
         curl = curl_easy_init();
         // send all output to /dev/null
-        devnull = fopen("/dev/null", "w+");
+#       ifdef __linux__
+            devnull = fopen("/dev/null", "w+");
+#       elif _WIN32
+            devnull = fopen("nul", "w+");
+#       endif
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, devnull);
     }
 
