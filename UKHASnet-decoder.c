@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include <unistd.h> // getopt
 #include <curl/curl.h>
+#include <string.h>
 
 #ifdef _WIN32	// We could also use __MINGW32__
     #include <fcntl.h>
@@ -48,6 +49,10 @@ bool quiet = false;
 
 // Sink data to the net?
 bool api = false;
+
+// gateway_id for when a value is specified on the command line
+#define GATEWAY_ID_SIZE 16	// Max length of the GATEWAY_ID
+uint8_t gateway_id[GATEWAY_ID_SIZE+1];
 
 // Default value assumes a 64kHz sampling rate
 uint16_t sampleRate = 64000;
@@ -162,7 +167,7 @@ bool processByte(uint8_t byte) {
             if(curl && api)
             {
                 snprintf(curlbuf, CURLBUF_SIZE, "origin=%s&data=%s", 
-                        GATEWAY_ID, buffer);
+                        gateway_id, buffer);
                 curl_easy_setopt(curl, CURLOPT_URL, 
                         "http://www.ukhas.net/api/upload");
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS,
@@ -217,9 +222,12 @@ void processBit(bool bit) {
 }
 
 int main (int argc, char**argv){
+    // Ensure gateway_id is Zero initialised
+    memset(gateway_id, 0 , GATEWAY_ID_SIZE+1);
+
     // parse options
     int opt;
-    while ((opt = getopt(argc, argv, "hvqws:")) != -1) {
+    while ((opt = getopt(argc, argv, "hvqwn:s:")) != -1) {
         switch (opt) {
             case 's':
                 sampleRate = atoi(optarg);
@@ -227,6 +235,13 @@ int main (int argc, char**argv){
                     fprintf(stderr, "Illegal sampling rate - %d.\n", sampleRate);
                     fprintf(stderr, "Must be over %d Hz and a multiple of %d Hz.\n", 2*BIT_RATE, BIT_RATE);
                     return 1;
+                }
+                break;
+            case 'n':
+                strncpy(gateway_id, optarg, GATEWAY_ID_SIZE);
+                if (strlen(gateway_id) != strlen(optarg) ) {
+                    fprintf(stderr, "Warning: Gateway ID has been truncated\n");
+                    fprintf(stderr, "    using \"%s\"\n", gateway_id);
                 }
                 break;
             case 'v':
@@ -242,10 +257,11 @@ int main (int argc, char**argv){
                 break;
             case 'h':
             default:
-                printf("Usage: UKHASnet-decoder [-s sample_rate][-v][-h] \n"
+                printf("Usage: UKHASnet-decoder [-n gateway_id] [-s sample_rate] [-v|-q] [-w] [-h]\n"
                         "Expects rtl_fm output:\n"
                         "\trtl_fm -f 433961890 -s 64k -g 0 -p 162 | ./UKHASnet-decoder -v -s 64000\n"
                         "\trtl_fm -f 433961890 -s 64k -g 0 -p 162 -r 8000 | ./UKHASnet-decoder -v -s 8000\n"
+                        "\t[-n gateway name to report on the ukhas.net api]\n"
                         "\t[-s sample_rate in Hz. Above 4kHz and a multiple of 2kHz.]\n"
                         "\t[-w submit data to ukhas.net api]\n"
                         "\t[-v verbose mode] (negates prev. quiet)\n"
@@ -258,10 +274,19 @@ int main (int argc, char**argv){
     if (!quiet) {
         printf("UKHAS decoder using rtl_fm\n");
         printf("Sample rate: %d Hz\n", sampleRate);
+        if (strlen(gateway_id)>0) {
+            printf("Gateway ID is set to %s\n", gateway_id);
+        } else {
+            printf("Using Default Gateway ID of %s\n", GATEWAY_ID);
+        }
         if (verbose) {
             printf("Verbose mode\n");
         }
         printf("\n");
+    }
+
+    if (strlen(gateway_id) == 0){
+        strncpy(gateway_id, GATEWAY_ID, GATEWAY_ID_SIZE);
     }
 
     // process samples

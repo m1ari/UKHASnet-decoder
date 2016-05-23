@@ -11,6 +11,12 @@ Before starting
 
 `rtl_test -p 10` to get ppm error or use kalibrate but it did not work for me on OSX.
 
+Gateway Name
+-------
+The compile time default is now configured via the makefile and is set to UKHASGW by default, This can be overridden by editing the makefile.
+
+You can also specify the name to use at run time by adding the -n flag, this will override the default value. Unless running in Quiet mode it will display, at start up, whether the deafult Gateway or provided name is being used.
+
 Get started
 -------
 `make`

@@ -15,6 +15,7 @@ $(TARGET): $(SOURCES)
 
 $(TARGET).exe: $(SOURCES)
 	i686-w64-mingw32-gcc -std=gnu99 -o $@ $^ \
+		-DGATEWAY_ID=\"$(GATEWAY)\" \
 		-DCURL_STATICLIB -static \
 		-I$(HOME)/mingw/curl/include -L$(HOME)/mingw/curl/lib \
 		-L$(HOME)/mingw/openssl/lib \
